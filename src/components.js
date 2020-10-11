@@ -15,66 +15,46 @@ class MyGroup extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            group_urls: [],
             groups: [],
-            jwt_token: localStorage.getItem('jwt'),
-            username: localStorage.getItem('username'),
-            loggedIn: true,
         };
-        this.getGroupName = this.getGroupName.bind(this);
-        this.getUserData = this.getUserData.bind(this);
+        this.getGroupData = this.getGroupData.bind(this);
     }
 
-    getGroupName(group_urls) {
-
-        let { jwt_token } = this.state;
-
-        for (let group_url of group_urls) {
-            axios.get(group_url,
+    async getGroupData(userId, jwt) {
+        try {
+            const groupData = await axios.get(
+                `${api_url}/users/${userId}/groups`,
                 {
                     headers: {
-                        'Authorization': ('Bearer ' + jwt_token)
+                        'Authorization': ('Bearer ' + jwt)
                     }
-                }).then(
-                    (res) => {
-                        let { groups } = this.state;
-                        this.setState({
-                            groups: [...groups, res.data]
-                        });
-                    }
-                ).catch(
-                    (err) => {
-                        console.log(err);
-                        if (err.response.status === 401) {
-                            this.setState({ loggedIn: false });
-                            this.props.logOutApplication();
-                        }
-                    }
-                );
-        }
-    }
-
-    async getUserData() {
-        let { username } = this.state;
-
-        try {
-            const userData = await axios.get(
-                `${api_url}/users/?username=${username}`
-            )
-            const groupName = this.getGroupName(userData.data[0].my_groups);
-        }
-        catch (err) {
+                }
+            );
+            this.setState({
+                groups: groupData.data.my_groups
+            });
+        } catch (err) {
             console.log(err);
+            if (err.response.status === 401) {
+                this.props.handleLogOut();
+            }
         }
     }
 
     componentDidMount() {
-        this.getUserData();
+        const userId = localStorage.getItem('userId');
+        const jwt = localStorage.getItem('jwt');
+        if (userId !== null && jwt !== null) {
+            this.getGroupData(userId, jwt);
+        } else {
+            this.props.handleLogOut();
+        }
     }
 
-    render(props) {
-        let { loggedIn, groups } = this.state;
-        if (!loggedIn) {
+    render() {
+        let { groups } = this.state;
+        let { isLoggedIn } = this.props
+        if (!isLoggedIn) {
             return (<Redirect to='/login' />)
         }
         return (
@@ -101,51 +81,37 @@ class MyGroup extends Component {
 
 function MyTask(props) {
     const [Tasks, setTasks] = useState([]);
-    const [LoggedIn, setLoggedIn] = useState(true);
 
-    const username = localStorage.getItem('username');
-    const jwt_token = localStorage.getItem('jwt');
+    const userId = localStorage.getItem('userId');
+    const jwt = localStorage.getItem('jwt');
 
-    async function fetchTaskData(userPk) {
+    async function getTasks() {
         try {
             const taskData = await axios.get(
-                `${api_url}/users/${userPk}/tasks/`,
+                `${api_url}/users/${userId}/tasks`,
                 {
                     headers: {
-                        Authorization: 'Bearer ' + jwt_token
+                        Authorization: 'Bearer ' + jwt
                     }
                 }
-            );
-            setTasks(taskData.data.my_tasks);
+            )
+            setTasks(taskData.data.my_tasks)
         } catch (err) {
-            console.log(err);
-            if (err.response.status === 401) {
-                setLoggedIn(false);
-                props.logOutApplication();
-            }
-        }
-    }
-
-    async function getUserData() {
-
-        try {
-            const userData = await axios.get(
-                `${api_url}/users/?username=${username}`
-            );
-            const taskData = fetchTaskData(userData.data[0].pk);
-        }
-        catch (err) {
             console.log(err);
         }
     }
 
     useEffect(
         () => {
-            getUserData();
+            if (userId !== null || jwt !== null){
+                getTasks();
+            } else {
+                props.handleLogOut();
+            }
         }
         , [])
 
-    if (!LoggedIn) {
+    if (!props.isLoggedIn) {
         return (
             <Redirect to="/login" />
         )
@@ -184,11 +150,8 @@ function MyTask(props) {
 
 function Group(props) {
     const [Group, setGroup] = useState(null);
-    const [Users, setUsers] = useState([]);
-    const [Tasks, setTasks] = useState([]);
     const [AddMemberDialogOpen, setAddMemberDialogOpen] = useState(false);
     const [AddTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
-    const [LoggedIn, setLoggedIn] = useState(true);
 
     let { pk } = useParams();
 
@@ -205,47 +168,15 @@ function Group(props) {
         ).then(
             result => {
                 setGroup(result.data);
-                getUserData(result.data.members);
-                getTaskData(result.data.group_tasks);
             }
         ).catch(
             err => {
                 console.log(err);
                 if (err.response.status === 401) {
-                    setLoggedIn(false);
-                    props.logOutApplication();
+                    props.handleLogOut();
                 }
             }
         );
-    }
-
-    async function getUserData(user_urls) {
-
-        let getUser = function () {
-            return user_urls.map((url) => axios.get(url))
-        }
-        const usersData = await axios.all(getUser())
-        const users = usersData.map(
-            (userData) => userData.data
-        );
-        setUsers(users);
-    }
-
-    async function getTaskData(task_urls) {
-        let getTask = function () {
-            return task_urls.map((url) => axios.get(url,
-                {
-                    headers: {
-                        'Authorization': ('Bearer ' + jwt_token)
-                    }
-                }
-            ))
-        }
-        const tasksData = await axios.all(getTask());
-        const tasks = tasksData.map(
-            (taskData) => taskData.data
-        );
-        setTasks(tasks);
     }
 
     useEffect(
@@ -271,7 +202,7 @@ function Group(props) {
         fetchGroupData();
     }
 
-    if (!LoggedIn) {
+    if (!props.isLoggedIn) {
         return (
             <Redirect to='/login' />
         )
@@ -293,18 +224,17 @@ function Group(props) {
                             groupId={Group.pk} />
                         <MembersList
                             onUserChange={fetchGroupData}
-                            Users={Users}
+                            Users={Group.members}
                             Group={Group} />
-                        <p>{Users.username}</p>
                         <h2>Tasks</h2>
                         <button onClick={openAddTaskDialog}>Add New Task</button>
                         <AddTaskDialog
                             Group={Group}
-                            Users={Users}
+                            Users={Group.members}
                             open={AddTaskDialogOpen}
                             onClose={cancelAddTask} />
                         <TaskList
-                            Tasks={Tasks}
+                            Tasks={Group.group_tasks}
                             onTaskChange={fetchGroupData} />
                     </div>
             }
@@ -317,27 +247,17 @@ function MembersList(props) {
     const jwt_token = localStorage.getItem('jwt')
 
     async function deleteMember(userPk) {
-        const relatedMembershipUrl = await getMembershipId(userPk, props.Group.pk);
+        const groupPk = props.Group.pk
         try {
-            const deleteMember = await axios.delete(
-                relatedMembershipUrl,
+            const response = await axios.delete(
+                `${api_url}/groups/${groupPk}/users/${userPk}`,
                 {
                     headers: {
                         'Authorization': ('Bearer ' + jwt_token)
                     }
                 }
-            );
+            )
             props.onUserChange();
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    async function getMembershipId(userPk, groupPk) {
-        try {
-            const relatedMembership = await axios.get(
-                `${api_url}/memberships/?user=${userPk}&group=${groupPk}`);
-            return relatedMembership.data[0].url;
         } catch (err) {
             console.log(err)
         }
@@ -419,20 +339,40 @@ function TaskList(props) {
 function AddMemberDialog(props) {
     const [Username, setUsername] = useState('');
 
+    const jwt_token = localStorage.getItem('jwt');
+
     function changeUsername(event) {
         setUsername(event.target.value);
     }
 
+    async function convertUsernameToUserId(username) {
+        const userId = await axios.get(
+            `${api_url}/users/${username}`,
+            {
+                headers: {
+                    Authorization: 'Bearer ' + jwt_token
+                }
+            }
+        )
+        return userId.data.pk
+    }
+
     async function onSubmit(event) {
         event.preventDefault();
+        let { groupId } = props
         try {
-            const response = await axios.post(
-                `${api_url}/memberships/`,
+            const userId = await convertUsernameToUserId(Username);
+            //What if username is invalid?
+            const response = await axios.put(
+                `${api_url}/groups/${groupId}/users/${userId}`,
+                {},
                 {
-                    user: Username,
-                    group: props.groupId,
+                    headers: {
+                        Authorization: 'Bearer ' + jwt_token
+                    }
                 }
             );
+            console.log(response)
             props.onClose();
         } catch (err) {
             console.log(err);
@@ -444,7 +384,7 @@ function AddMemberDialog(props) {
             open={props.open}
             onClose={props.onClose}
             aria-labelledby="form-dialog-title">
-            <form onSubmit={(event) => onSubmit(event)}>
+            <form onSubmit={onSubmit}>
                 <label>Username
                     <input
                         type='text'
@@ -455,7 +395,7 @@ function AddMemberDialog(props) {
                 </label>
                 <br />
                 <button type="submit">Add Member</button>
-                <button onClick={props.onClose}>Cancel</button>
+                <button type="button" onClick={props.onClose}>Cancel</button>
             </form>
         </Dialog>
     );
@@ -490,7 +430,7 @@ function AddTaskDialog(props) {
     async function addTask() {
         try {
             const response = await axios.post(
-                `${api_url}/tasks/`,
+                `${api_url}/tasks`,
                 {
                     name: Name,
                     desc: Desc,
@@ -582,7 +522,7 @@ function AddTaskDialog(props) {
                 }
                 <br />
                 <button type="submit">Add Task</button>
-                <button onClick={props.onClose} >Cancel</button>
+                <button type="button" onClick={props.onClose} >Cancel</button>
             </form>
         </Dialog>
     )

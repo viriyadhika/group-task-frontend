@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -18,70 +18,183 @@ import logo from './logo.svg';
 
 const api_url = 'http://127.0.0.1:8000'
 
+/**
+ * Interesting observation: if the log in 
+ * and out is governed via props instead of local storage, 
+ * when the browser is refreshed, the memory is refreshed and thus
+ * the application immediately logged out
+ * @param {*} props 
+ */
+function App(props) {
+  const [LoggedIn, setLoggedIn] = useState(
+    localStorage.getItem('jwt') !== null &&
+    localStorage.getItem('userId') !== null
+  );
 
-class App extends Component {
-
-  constructor(props) {
-    super(props);
-
-    let jwt_token = localStorage.getItem('jwt');
-    let username = localStorage.getItem('username');
-
-    this.state = {
-      loggedIn: jwt_token !== null && username !== null
-    };
-    this.logOutApplication = this.logOutApplication.bind(this)
-    this.changeLogInState = this.changeLogInState.bind(this)
+  function handleLogIn(jwt, userId) {
+    localStorage.setItem('jwt', jwt);
+    localStorage.setItem('userId', userId);
+    rerender();
   }
 
-  changeLogInState() {
-    let jwt_token = localStorage.getItem('jwt');
-    let username = localStorage.getItem('username');
-
-    this.setState({
-      loggedIn: jwt_token !== null && username !== null
-    });
-  }
-
-  logOutApplication() {
+  function handleLogOut() {
     localStorage.removeItem('jwt');
-    localStorage.removeItem('username');
-    this.setState({
-      loggedIn: false
-    })
+    localStorage.removeItem('userId');
+    rerender();
   }
 
-  render() {
-    return (
-      <div className="App">
-        <Router>
-          <NavBar isLoggedIn={this.state.loggedIn} />
-          <Switch>
-            <Route exact path="/" component={Home} />
-            <Route path="/mygroups/">
-              <MyGroup 
-                logOutApplication={this.logOutApplication}
-              />
-            </Route>
-            <Route path="/mytasks/">
-              <MyTask 
-                logOutApplication={this.logOutApplication} />
-            </Route>
-            <Route path="/login/" >
-              <Login changeNavBar={this.changeLogInState} />
-            </Route>
-            <Route path="/logout/" component={Logout}>
-              <Logout changeNavBar={this.changeLogInState} />
-            </Route>
-            <Route path="/group/:pk/">
-              <Group 
-                logOutApplication={this.logOutApplication} />
-            </Route>
-          </Switch>
-        </Router>
-      </div>
-    );
+  function rerender() {
+    const jwt = localStorage.getItem('jwt');
+    const userId = localStorage.getItem('userId');
+    setLoggedIn(jwt !== null && userId !== null);
   }
+
+  return (
+    <div className="App">
+      <Router>
+        <NavBar
+          isLoggedIn={LoggedIn} />
+        <Switch>
+          <Route exact path="/">
+            <Home />
+          </Route>
+          <Route path="/login">
+            <Login
+              handleLogIn={handleLogIn}
+              isLoggedIn={LoggedIn} />
+          </Route>
+          <Route path="/logout">
+            <Logout
+              handleLogOut={handleLogOut} />
+          </Route>
+          <Route path="/mygroups">
+            <MyGroup
+              isLoggedIn={LoggedIn}
+              handleLogOut={handleLogOut} />
+          </Route>
+          <Route path="/group/:pk">
+            <Group
+              isLoggedIn={LoggedIn}
+              handleLogOut={handleLogOut} />
+          </Route>
+          <Route path="/mytasks">
+            <MyTask
+              isLoggedIn={LoggedIn}
+              handleLogOut={handleLogOut} />
+          </Route>
+          <Route path="/signup">
+            <SignUp
+              isLoggedIn={LoggedIn}
+              handleLogOut={handleLogOut} />
+          </Route>
+        </Switch>
+      </Router>
+    </div>
+  )
+
+}
+
+function SignUp(props) {
+  const [Username, setUsername] = useState('');
+  const [Email, setEmail] = useState('');
+  const [Password, setPassword] = useState('');
+  const [ConfirmPassword, setConfirmPassword] = useState('');
+  const [Error, setError] = useState('')
+
+  function handleChangeUsername(event) {
+    setUsername(event.target.value);
+  }
+
+  function handleChangeEmail(event) {
+    setEmail(event.target.value);
+  }
+
+  function handleChangePassword(event) {
+    setPassword(event.target.value);
+  }
+
+  function handleChangeConfirmPassword(event) {
+    setConfirmPassword(event.target.value);
+  }
+
+  async function signUpUser() {
+    try {
+      const response = await axios.post(
+        `${api_url}/users`,
+        {
+          username: Username,
+          email: Email,
+          password: Password,
+        }
+      )
+      console.log(response)
+    } catch (err) {
+      setError(err.response.data[0])
+    }
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (Password === ConfirmPassword) {
+      if (Username && Password) {
+        signUpUser();
+      } else {
+        setError("Username and password can't be empty")
+      }
+    }
+  }
+
+  return (
+    <div className='signup'>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Username:
+        <input 
+          value={Username}
+          type='text'
+          onChange={handleChangeUsername} />
+        </label>
+        <br />
+        <label>
+          Email:
+        <input 
+          type='email'
+          value={Email}
+          onChange={handleChangeEmail} />
+        </label>
+        <br />
+        <label>
+          Password:
+          <input
+            type='password'
+            value={Password}
+            onChange={handleChangePassword} />
+        </label>
+        <br />
+        <label>
+          Confirm Password:
+          <input
+            type='password'
+            value={ConfirmPassword}
+            onChange={handleChangeConfirmPassword} />
+        </label>
+        {
+          Password === ConfirmPassword ?
+          <span></span>
+          :
+          <p>Password do not match</p>
+        }
+        {
+          Error ?
+          <p>{Error}</p>
+          :
+          <span></span>
+        }
+        <br />
+        <button type='submit'>Sign Up</button>
+      </form>
+    </div>
+  );
 }
 
 function Home() {
@@ -105,7 +218,8 @@ function NavBar(props) {
   else {
     return (
       <div>
-        <Link to="/login/">Log In</Link>
+        <Link to="/signup">Sign Up</Link>
+        <Link to="/login">Log In</Link>
       </div>
     );
   }
@@ -117,6 +231,7 @@ class Login extends Component {
     super(props);
     this.state = {
       username: '',
+      userId: '',
       password: '',
       error_msg: '',
     };
@@ -126,6 +241,22 @@ class Login extends Component {
     this.handleAuthFail = this.handleAuthFail.bind(this);
   }
 
+  convertUsernameToUserId(username, jwt) {
+    axios.get(
+      `${api_url}/users/${username}`,
+      {
+        headers: {
+          Authorization: 'Bearer ' + jwt
+        }
+      }
+    ).then(
+      (res) => {
+        this.props.handleLogIn(jwt, res.data.pk);
+      }
+    ).catch(
+      (err) => console.log(err)
+    )
+  }
 
   handleLogin(event) {
 
@@ -141,9 +272,8 @@ class Login extends Component {
       },
     ).then(
       (res) => {
-        localStorage.setItem('jwt', res.data.access);
-        localStorage.setItem('username', username);
-        this.props.changeNavBar();
+        const jwt = res.data.access;
+        this.convertUsernameToUserId(this.state.username, jwt);
       }
     ).catch(
       (err) => {
@@ -157,7 +287,7 @@ class Login extends Component {
 
   handleAuthFail() {
     this.setState(
-      { error_msg : 'Username or Password is wrong, try again!' }
+      { error_msg: 'Username or Password is wrong, try again!' }
     );
   }
 
@@ -174,14 +304,12 @@ class Login extends Component {
   }
 
   render() {
-    let username = localStorage.getItem('username');
-    let jwt_token = localStorage.getItem('jwt');
 
-    let {error_msg} = this.state;
+    let { error_msg } = this.state;
 
-    if (username !== null && jwt_token !== null) {
+    if (this.props.isLoggedIn) {
       return (
-        <Redirect to={{ pathname: '/mygroups/' }} />
+        <Redirect to={{ pathname: '/mygroups' }} />
       )
     }
 
@@ -199,14 +327,9 @@ class Login extends Component {
 }
 
 class Logout extends Component {
-  constructor(props) {
-    super(props);
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('username');
-  }
 
-  componentWillUnmount () {
-    this.props.changeNavBar();
+  componentWillUnmount() {
+    this.props.handleLogOut();
   }
 
   render() {
