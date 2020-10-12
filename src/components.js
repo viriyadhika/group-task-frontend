@@ -81,7 +81,7 @@ class MyGroup extends Component {
 
 function MyTask(props) {
     const [Tasks, setTasks] = useState([]);
-
+    //What if user is not logged in
     const userId = localStorage.getItem('userId');
     const jwt = localStorage.getItem('jwt');
 
@@ -372,7 +372,6 @@ function AddMemberDialog(props) {
                     }
                 }
             );
-            console.log(response)
             props.onClose();
         } catch (err) {
             console.log(err);

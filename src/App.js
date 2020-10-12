@@ -14,6 +14,16 @@ import {
   Group,
 } from './components';
 import axios from 'axios';
+import Jumbotron from 'react-bootstrap/Jumbotron'
+import Navbar from 'react-bootstrap/Navbar'
+import Nav from 'react-bootstrap/Nav'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Button from 'react-bootstrap/Button'
+import Card from 'react-bootstrap/Card'
+import Form from 'react-bootstrap/Form'
+import NavDropdown from 'react-bootstrap/NavDropdown';
 import logo from './logo.svg';
 
 const api_url = 'http://127.0.0.1:8000'
@@ -28,66 +38,78 @@ const api_url = 'http://127.0.0.1:8000'
 function App(props) {
   const [LoggedIn, setLoggedIn] = useState(
     localStorage.getItem('jwt') !== null &&
-    localStorage.getItem('userId') !== null
+    localStorage.getItem('userId') !== null &&
+    localStorage.getItem('username') !== null
   );
 
-  function handleLogIn(jwt, userId) {
+  const [Username, setUsername] = useState(
+    localStorage.getItem('username')
+  )
+
+  function handleLogIn(jwt, userId, username) {
     localStorage.setItem('jwt', jwt);
     localStorage.setItem('userId', userId);
+    localStorage.setItem('username', username);
     rerender();
   }
 
   function handleLogOut() {
     localStorage.removeItem('jwt');
     localStorage.removeItem('userId');
+    localStorage.removeItem('username');
     rerender();
   }
 
   function rerender() {
     const jwt = localStorage.getItem('jwt');
     const userId = localStorage.getItem('userId');
-    setLoggedIn(jwt !== null && userId !== null);
+    const username = localStorage.getItem('username');
+    setUsername(username);
+    setLoggedIn(jwt !== null && userId !== null && username !== null);
   }
 
   return (
     <div className="App">
       <Router>
         <NavBar
+          username={Username}
           isLoggedIn={LoggedIn} />
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route path="/login">
-            <Login
-              handleLogIn={handleLogIn}
-              isLoggedIn={LoggedIn} />
-          </Route>
-          <Route path="/logout">
-            <Logout
-              handleLogOut={handleLogOut} />
-          </Route>
-          <Route path="/mygroups">
-            <MyGroup
-              isLoggedIn={LoggedIn}
-              handleLogOut={handleLogOut} />
-          </Route>
-          <Route path="/group/:pk">
-            <Group
-              isLoggedIn={LoggedIn}
-              handleLogOut={handleLogOut} />
-          </Route>
-          <Route path="/mytasks">
-            <MyTask
-              isLoggedIn={LoggedIn}
-              handleLogOut={handleLogOut} />
-          </Route>
-          <Route path="/signup">
-            <SignUp
-              isLoggedIn={LoggedIn}
-              handleLogOut={handleLogOut} />
-          </Route>
-        </Switch>
+        <Container className="p-3" fluid="md">
+          <Switch>
+            <Route exact path="/">
+              <Home />
+            </Route>
+            <Route path="/login">
+              <Login
+                handleLogIn={handleLogIn}
+                isLoggedIn={LoggedIn} />
+            </Route>
+            <Route path="/logout">
+              <Logout
+                handleLogOut={handleLogOut} />
+            </Route>
+            <Route path="/mygroups">
+              <MyGroup
+                isLoggedIn={LoggedIn}
+                handleLogOut={handleLogOut} />
+            </Route>
+            <Route path="/group/:pk">
+              <Group
+                isLoggedIn={LoggedIn}
+                handleLogOut={handleLogOut} />
+            </Route>
+            <Route path="/mytasks">
+              <MyTask
+                isLoggedIn={LoggedIn}
+                handleLogOut={handleLogOut} />
+            </Route>
+            <Route path="/signup">
+              <SignUp
+                isLoggedIn={LoggedIn}
+                handleLogOut={handleLogOut} />
+            </Route>
+          </Switch>
+        </Container>
       </Router>
     </div>
   )
@@ -134,6 +156,8 @@ function SignUp(props) {
   }
 
   function handleSubmit(event) {
+    //Redirect user to logged in page
+    //What if password is too short?
     event.preventDefault();
     if (Password === ConfirmPassword) {
       if (Username && Password) {
@@ -145,82 +169,127 @@ function SignUp(props) {
   }
 
   return (
-    <div className='signup'>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username:
-        <input 
-          value={Username}
-          type='text'
-          onChange={handleChangeUsername} />
-        </label>
-        <br />
-        <label>
-          Email:
-        <input 
-          type='email'
-          value={Email}
-          onChange={handleChangeEmail} />
-        </label>
-        <br />
-        <label>
-          Password:
-          <input
-            type='password'
-            value={Password}
-            onChange={handleChangePassword} />
-        </label>
-        <br />
-        <label>
-          Confirm Password:
-          <input
-            type='password'
-            value={ConfirmPassword}
-            onChange={handleChangeConfirmPassword} />
-        </label>
-        {
-          Password === ConfirmPassword ?
-          <span></span>
-          :
-          <p>Password do not match</p>
-        }
-        {
-          Error ?
-          <p>{Error}</p>
-          :
-          <span></span>
-        }
-        <br />
-        <button type='submit'>Sign Up</button>
-      </form>
-    </div>
+    <Row className="justify-content-center">
+      <Col md="auto">
+        <Card>
+          <Row className="justify-content-start">
+            <Col className="registration-title">
+              <h2>Sign Up</h2>
+            </Col>
+          </Row>
+          <Row className="justify-content-start">
+            <Col>
+              <Form onSubmit={handleSubmit}>
+                <Form.Group>
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    value={Username}
+                    type='text'
+                    onChange={handleChangeUsername}
+                    placeholder="Enter username"
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    value={Email}
+                    type='email'
+                    onChange={handleChangeEmail}
+                    placeholder="Enter Email"
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    value={Password}
+                    type='password'
+                    onChange={handleChangePassword}
+                    placeholder="Enter Password"
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Confirm Password</Form.Label>
+                  <Form.Control
+                    value={ConfirmPassword}
+                    type='password'
+                    onChange={handleChangeConfirmPassword}
+                    placeholder="Enter Password"
+                  />
+                  {
+                    Password === ConfirmPassword ?
+                      <span></span>
+                      :
+                      <div>
+                        <Form.Text className="text-danger">Password do not match</Form.Text>
+                        <br />
+                      </div>
+                  }
+                  {
+                    Error ?
+                      <div>
+                        <Form.Text className="text-danger">{Error}</Form.Text>
+                        <br />
+                      </div>
+                      :
+                      <span></span>
+                  }
+                </Form.Group>
+                <Button
+                  type="submit"
+                  variant="success" >
+                  Sign Up
+                  </Button>
+              </Form>
+            </Col>
+          </Row>
+        </Card>
+      </Col>
+    </Row>
   );
 }
 
 function Home() {
   return (
-    <h1>Home</h1>
+    <Jumbotron>
+      <h1>Home</h1>
+    </Jumbotron>
   )
 }
 
 function NavBar(props) {
-  let { isLoggedIn } = props;
+  let { isLoggedIn, username } = props;
 
   if (isLoggedIn) {
     return (
-      <div>
-        <Link to="/mygroups/">My Groups</Link>
-        <Link to="/mytasks/">My Tasks</Link>
-        <Link to="/logout/">Log Out</Link>
-      </div>
+      <Navbar collapseOnSelect bg="light" expand="lg">
+        <Navbar.Brand href="/">Group Task</Navbar.Brand>
+        <Navbar.Toggle className="ml-auto" aria-controls="navbar-nav" />
+        <Navbar.Collapse className="ml-auto" id="navbar-nav">
+          <Nav className="mr-auto">
+            <Nav.Link href="/mygroups">My Groups</Nav.Link>
+            <Nav.Link href="/mytasks">My Tasks</Nav.Link>
+          </Nav>
+          <Nav>
+            <NavDropdown title={username}>
+              <NavDropdown.Item href="/logout">Log Out</NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
     );
   }
   else {
     return (
-      <div>
-        <Link to="/signup">Sign Up</Link>
-        <Link to="/login">Log In</Link>
-      </div>
+      <Navbar collapseOnSelect bg="light" expand="lg">
+        <Navbar.Brand href="/">Group Task</Navbar.Brand>
+        <Navbar.Toggle className="ml-auto" aria-controls="navbar-nav" />
+        <Navbar.Collapse className="ml-auto" id="navbar-nav">
+          <Nav className="ml-auto">
+            <Nav.Link href="/signup">Sign Up</Nav.Link>
+            <Nav.Link href="/login">Log In</Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
     );
   }
 }
@@ -242,6 +311,7 @@ class Login extends Component {
   }
 
   convertUsernameToUserId(username, jwt) {
+    //What if cannot find the user id?
     axios.get(
       `${api_url}/users/${username}`,
       {
@@ -251,7 +321,7 @@ class Login extends Component {
       }
     ).then(
       (res) => {
-        this.props.handleLogIn(jwt, res.data.pk);
+        this.props.handleLogIn(jwt, res.data.pk, username);
       }
     ).catch(
       (err) => console.log(err)
@@ -259,7 +329,7 @@ class Login extends Component {
   }
 
   handleLogin(event) {
-
+    //What if the username and password is empty?
     event.preventDefault();
 
     let { username, password } = this.state;
@@ -314,14 +384,45 @@ class Login extends Component {
     }
 
     return (
-      <div>
-        <form onSubmit={(event) => this.handleLogin(event)}>
-          <input name="username" type="text" value={this.state.username} onChange={this.handleChangeUsername} />
-          <input name="password" type="password" value={this.state.password} onChange={this.handleChangePassword} />
-          <button type="submit" value="Submit" >Log In</button>
-        </form>
-        <p>{error_msg}</p>
-      </div>
+      <Row className="justify-content-center">
+        <Col md="auto">
+          <Card>
+            <Row className="justify-content-start">
+              <Col md="auto">
+                <h2 className="registration-title">Log In</h2>
+              </Col>
+            </Row>
+            <Row className="justify-content-start">
+              <Col>
+                <Form onSubmit={(event) => this.handleLogin(event)}>
+                  <Form.Group controlId="username">
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control
+                      onChange={this.handleChangeUsername}
+                      type="text"
+                      value={this.state.username}
+                      placeholder="Enter email" />
+                  </Form.Group>
+                  <Form.Group controlId="password">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                      onChange={this.handleChangePassword}
+                      type="password"
+                      value={this.state.password}
+                      placeholder="Enter password" />
+                  </Form.Group>
+                  <Button
+                    type="submit"
+                    variant="success" >
+                    Log In
+                  </Button>
+                  <p>{error_msg}</p>
+                </Form>
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
     );
   }
 }

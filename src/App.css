@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+.form-label {
+  float: inline-start;
+  text-align: start;
+}
+
+.form-text {
+  float: inline-start;
+  text-align: start;
+}
+
+.registration-title {
+  text-align: start;
+}
+
+.card {
+  padding: 1rem
+}
