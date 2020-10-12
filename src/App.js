@@ -172,74 +172,78 @@ function SignUp(props) {
     <Row className="justify-content-center">
       <Col md="auto">
         <Card>
-          <Row className="justify-content-start">
-            <Col className="registration-title">
-              <h2>Sign Up</h2>
-            </Col>
-          </Row>
-          <Row className="justify-content-start">
+          <Row className="p-3">
             <Col>
-              <Form onSubmit={handleSubmit}>
-                <Form.Group>
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control
-                    value={Username}
-                    type='text'
-                    onChange={handleChangeUsername}
-                    placeholder="Enter username"
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    value={Email}
-                    type='email'
-                    onChange={handleChangeEmail}
-                    placeholder="Enter Email"
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    value={Password}
-                    type='password'
-                    onChange={handleChangePassword}
-                    placeholder="Enter Password"
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control
-                    value={ConfirmPassword}
-                    type='password'
-                    onChange={handleChangeConfirmPassword}
-                    placeholder="Enter Password"
-                  />
-                  {
-                    Password === ConfirmPassword ?
-                      <span></span>
-                      :
-                      <div>
-                        <Form.Text className="text-danger">Password do not match</Form.Text>
-                        <br />
-                      </div>
-                  }
-                  {
-                    Error ?
-                      <div>
-                        <Form.Text className="text-danger">{Error}</Form.Text>
-                        <br />
-                      </div>
-                      :
-                      <span></span>
-                  }
-                </Form.Group>
-                <Button
-                  type="submit"
-                  variant="success" >
-                  Sign Up
+              <Row className="justify-content-start">
+                <Col className="registration-title">
+                  <h2>Sign Up</h2>
+                </Col>
+              </Row>
+              <Row className="justify-content-start">
+                <Col>
+                  <Form onSubmit={handleSubmit}>
+                    <Form.Group>
+                      <Form.Label>Username</Form.Label>
+                      <Form.Control
+                        value={Username}
+                        type='text'
+                        onChange={handleChangeUsername}
+                        placeholder="Enter username"
+                      />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control
+                        value={Email}
+                        type='email'
+                        onChange={handleChangeEmail}
+                        placeholder="Enter Email"
+                      />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Password</Form.Label>
+                      <Form.Control
+                        value={Password}
+                        type='password'
+                        onChange={handleChangePassword}
+                        placeholder="Enter Password"
+                      />
+                    </Form.Group>
+                    <Form.Group>
+                      <Form.Label>Confirm Password</Form.Label>
+                      <Form.Control
+                        value={ConfirmPassword}
+                        type='password'
+                        onChange={handleChangeConfirmPassword}
+                        placeholder="Enter Password"
+                      />
+                      {
+                        Password === ConfirmPassword ?
+                          <span></span>
+                          :
+                          <div>
+                            <Form.Text className="text-danger">Password do not match</Form.Text>
+                            <br />
+                          </div>
+                      }
+                      {
+                        Error ?
+                          <div>
+                            <Form.Text className="text-danger">{Error}</Form.Text>
+                            <br />
+                          </div>
+                          :
+                          <span></span>
+                      }
+                    </Form.Group>
+                    <Button
+                      type="submit"
+                      variant="success" >
+                      Sign Up
                   </Button>
-              </Form>
+                  </Form>
+                </Col>
+              </Row>
             </Col>
           </Row>
         </Card>
@@ -387,37 +391,41 @@ class Login extends Component {
       <Row className="justify-content-center">
         <Col md="auto">
           <Card>
-            <Row className="justify-content-start">
-              <Col md="auto">
-                <h2 className="registration-title">Log In</h2>
-              </Col>
-            </Row>
-            <Row className="justify-content-start">
+            <Row className="p-3">
               <Col>
-                <Form onSubmit={(event) => this.handleLogin(event)}>
-                  <Form.Group controlId="username">
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control
-                      onChange={this.handleChangeUsername}
-                      type="text"
-                      value={this.state.username}
-                      placeholder="Enter email" />
-                  </Form.Group>
-                  <Form.Group controlId="password">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                      onChange={this.handleChangePassword}
-                      type="password"
-                      value={this.state.password}
-                      placeholder="Enter password" />
-                  </Form.Group>
-                  <Button
-                    type="submit"
-                    variant="success" >
-                    Log In
+                <Row className="justify-content-start">
+                  <Col md="auto">
+                    <h2 className="registration-title">Log In</h2>
+                  </Col>
+                </Row>
+                <Row className="justify-content-start">
+                  <Col>
+                    <Form onSubmit={(event) => this.handleLogin(event)}>
+                      <Form.Group controlId="username">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control
+                          onChange={this.handleChangeUsername}
+                          type="text"
+                          value={this.state.username}
+                          placeholder="Enter email" />
+                      </Form.Group>
+                      <Form.Group controlId="password">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
+                          onChange={this.handleChangePassword}
+                          type="password"
+                          value={this.state.password}
+                          placeholder="Enter password" />
+                      </Form.Group>
+                      <Button
+                        type="submit"
+                        variant="success" >
+                        Log In
                   </Button>
-                  <p>{error_msg}</p>
-                </Form>
+                      <p>{error_msg}</p>
+                    </Form>
+                  </Col>
+                </Row>
               </Col>
             </Row>
           </Card>

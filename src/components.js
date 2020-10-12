@@ -16,8 +16,12 @@ class MyGroup extends Component {
         super(props);
         this.state = {
             groups: [],
+            dialogOpen: false,
         };
         this.getGroupData = this.getGroupData.bind(this);
+        this.openAddNewGroupDialog = this.openAddNewGroupDialog.bind(this);
+        this.rerender = this.rerender.bind(this);
+        this.closeDialog = this.closeDialog.bind(this);
     }
 
     async getGroupData(userId, jwt) {
@@ -41,7 +45,7 @@ class MyGroup extends Component {
         }
     }
 
-    componentDidMount() {
+    async rerender() {
         const userId = localStorage.getItem('userId');
         const jwt = localStorage.getItem('jwt');
         if (userId !== null && jwt !== null) {
@@ -51,17 +55,38 @@ class MyGroup extends Component {
         }
     }
 
+    closeDialog() {
+        this.setState(
+            {dialogOpen: false}
+        )
+        this.rerender();
+    }
+
+    componentDidMount() {
+        this.rerender()
+    }
+
+    openAddNewGroupDialog() {
+        this.setState({
+            dialogOpen: true
+        })
+    }
+
     render() {
-        let { groups } = this.state;
+        let { groups, dialogOpen } = this.state;
         let { isLoggedIn } = this.props
         if (!isLoggedIn) {
             return (<Redirect to='/login' />)
         }
         return (
             <div>
+                <h1>My Groups</h1>
                 {groups !== [] ?
                     <div>
-                        <h1>My Groups</h1>
+                        <button onClick={this.openAddNewGroupDialog} >Add Group</ button>
+                        <AddGroupDialog
+                            open={dialogOpen}
+                            onClose={this.closeDialog} />
                         <ul>
                             {groups.map((group) => (
                                 <li key={group.pk}>
@@ -77,6 +102,59 @@ class MyGroup extends Component {
             </div>
         )
     };
+}
+
+function AddGroupDialog(props) {
+    const [Name, setName] = useState('');
+    
+    function handleChangeName(event) {
+        setName(event.target.value)
+    }
+
+    async function createNewGroup(event) {
+        event.preventDefault();
+
+        const userId = localStorage.getItem('userId');
+        const jwt = localStorage.getItem('jwt');
+
+        if (userId === null || jwt === null) {
+            this.props.handleLogOut();
+        }
+
+        const response = await axios.post(
+            `${api_url}/groups`,
+            {
+                name: Name
+            },
+            {
+                headers: {
+                    Authorization: 'Bearer ' + jwt
+                }
+            }
+        )
+        props.onClose();
+    }
+
+    return (
+        <Dialog
+            open={props.open}
+            onClose={props.onClose}
+            aria-labelledby="form-dialog-title">
+            <form onSubmit={createNewGroup}>
+                <label>Group Name
+                <input
+                        type='text'
+                        name='username'
+                        value={Name}
+                        onChange={handleChangeName}
+                    />
+                </label>
+                <br />
+                <button type="submit">Create New Group</button>
+                <button type="button" onClick={props.onClose}>Cancel</button>
+            </form>
+        </Dialog>
+    )
 }
 
 function MyTask(props) {
@@ -103,7 +181,7 @@ function MyTask(props) {
 
     useEffect(
         () => {
-            if (userId !== null || jwt !== null){
+            if (userId !== null || jwt !== null) {
                 getTasks();
             } else {
                 props.handleLogOut();
