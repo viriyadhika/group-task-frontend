@@ -6,6 +6,12 @@ import {
     Link,
     useParams
 } from 'react-router-dom';
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Button from 'react-bootstrap/Button'
+import Card from 'react-bootstrap/Card'
+import Form from 'react-bootstrap/Form'
+import Table from 'react-bootstrap/Table'
 import Dialog from '@material-ui/core/Dialog';
 
 const api_url = 'http://127.0.0.1:8000'
@@ -57,7 +63,7 @@ class MyGroup extends Component {
 
     closeDialog() {
         this.setState(
-            {dialogOpen: false}
+            { dialogOpen: false }
         )
         this.rerender();
     }
@@ -79,34 +85,44 @@ class MyGroup extends Component {
             return (<Redirect to='/login' />)
         }
         return (
-            <div>
-                <h1>My Groups</h1>
-                {groups !== [] ?
-                    <div>
-                        <button onClick={this.openAddNewGroupDialog} >Add Group</ button>
-                        <AddGroupDialog
-                            open={dialogOpen}
-                            onClose={this.closeDialog} />
-                        <ul>
-                            {groups.map((group) => (
-                                <li key={group.pk}>
-                                    <Link to={`/group/${group.pk}`}>
-                                        {group.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div> :
-                    <p>Loading...</p>
-                }
-            </div>
+            <Row className="justify-content-center">
+                <Col>
+                    <Row>
+                        <Col>
+                            <h1>My Groups</h1>
+                            <Button onClick={this.openAddNewGroupDialog}>Create New Group</Button>
+                            <AddGroupDialog
+                                open={dialogOpen}
+                                onClose={this.closeDialog} />
+                        </Col>
+                    </Row>
+                    <Row className="justify-content-center">
+                        <Col style={{ maxWidth: '30rem' }}>
+                            <Row className="my-1 align-items-stretch justify-content-start">
+                                {groups.map((group) =>
+                                    <Col style={{ maxWidth: '12rem' }} className="m-1" key={group.pk} >
+                                        <Card>
+                                            <Card.Body>
+                                                <Link to={`/group/${group.pk}`} >
+                                                    {group.name}
+                                                </Link>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                )}
+                            </Row>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+
         )
     };
 }
 
 function AddGroupDialog(props) {
     const [Name, setName] = useState('');
-    
+
     function handleChangeName(event) {
         setName(event.target.value)
     }
@@ -140,19 +156,38 @@ function AddGroupDialog(props) {
             open={props.open}
             onClose={props.onClose}
             aria-labelledby="form-dialog-title">
-            <form onSubmit={createNewGroup}>
-                <label>Group Name
-                <input
-                        type='text'
-                        name='username'
-                        value={Name}
-                        onChange={handleChangeName}
-                    />
-                </label>
-                <br />
-                <button type="submit">Create New Group</button>
-                <button type="button" onClick={props.onClose}>Cancel</button>
-            </form>
+            <Row className="m-3">
+                <Col>
+                    <Form onSubmit={createNewGroup}>
+                        <Form.Group>
+                            <Form.Label>Group Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name='username'
+                                placeholder='Enter Group Name'
+                                value={Name}
+                                onChange={handleChangeName} />
+                        </Form.Group>
+                        <Row>
+                            <Col xs="auto">
+                                <Button
+                                    type="submit"
+                                    variant="success">
+                                    Create
+                        </Button>
+                            </Col>
+                            <Col xs="auto">
+                                <Button
+                                    variant="light"
+                                    type="button"
+                                    onClick={props.onClose}>
+                                    Cancel
+                            </Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Col>
+            </Row>
         </Dialog>
     )
 }
@@ -176,6 +211,7 @@ function MyTask(props) {
             setTasks(taskData.data.my_tasks)
         } catch (err) {
             console.log(err);
+            props.handleLogOut();
         }
     }
 
@@ -197,32 +233,43 @@ function MyTask(props) {
 
     return (
         <div>
-            <h1>My Tasks</h1>
-            <table style={{ marginInlineStart: 'auto', marginInlineEnd: 'auto' }}>
-                <thead>
-                    <tr>
-                        <th>Task Name</th>
-                        <th>Desc</th>
-                        <th>Group</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        Tasks.map((task) =>
-                            <tr key={task.pk}>
-                                <td>{task.name}</td>
-                                <td>{task.desc}</td>
-                                <td>
-                                    <Link to={`/group/${task.group.pk}`}>
-                                        {task.group.name}
-                                    </Link>
-                                </td>
+            <Row className='justify-content-center'>
+                <Col>
+                    <h1>My Tasks</h1>
+                </Col>
+            </Row>
+            <Row className="justify-content-center">
+                <Col style={{ maxWidth: '70%' }}>
+                    <Table bordered style={{ textAlign: 'left' }}>
+                        <thead>
+                            <tr>
+                                <th>Task Name</th>
+                                <th>Description</th>
+                                <th>Due Date</th>
+                                <th>Group</th>
                             </tr>
-                        )
-                    }
-                </tbody>
-            </table>
-        </div>
+                        </thead>
+                        <tbody>
+                            {
+                                Tasks.map((task) =>
+                                    <tr key={task.pk}>
+                                        <td>{task.name}</td>
+                                        <td>{task.desc}</td>
+                                        <td>{task.due_date}</td>
+                                        <td>
+                                            <Link to={`/group/${task.group.pk}`}>
+                                                {task.group.name}
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                )
+                            }
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row >
+
+        </div >
     )
 }
 
@@ -293,27 +340,52 @@ function Group(props) {
                     <p>Loading...</p>
                     :
                     <div>
+
                         <h1>{Group.name}</h1>
-                        <h2>Members</h2>
-                        <button onClick={openAddMemberDialog}>Add Member</button>
+                        <Row>
+                            <Col>
+                                <h2>Members</h2>
+                            </Col>
+                        </Row>
+                        <Row className="m-3">
+                            <Col>
+                                <Button onClick={openAddMemberDialog}>Add Member</Button>
+                            </Col>
+                        </Row>
                         <AddMemberDialog
                             open={AddMemberDialogOpen}
                             onClose={cancelAddMember}
                             groupId={Group.pk} />
-                        <MembersList
-                            onUserChange={fetchGroupData}
-                            Users={Group.members}
-                            Group={Group} />
-                        <h2>Tasks</h2>
-                        <button onClick={openAddTaskDialog}>Add New Task</button>
+                        <Row>
+                            <Col>
+                                <MembersList
+                                    onUserChange={fetchGroupData}
+                                    Users={Group.members}
+                                    Group={Group} />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <h2>Tasks</h2>
+                            </Col>
+                        </Row>
+                        <Row className="m-3">
+                            <Col>
+                                <Button onClick={openAddTaskDialog}>Add New Task</Button>
+                            </Col>
+                        </Row>
                         <AddTaskDialog
                             Group={Group}
                             Users={Group.members}
                             open={AddTaskDialogOpen}
                             onClose={cancelAddTask} />
-                        <TaskList
-                            Tasks={Group.group_tasks}
-                            onTaskChange={fetchGroupData} />
+                        <Row className="justify-content-center">
+                            <Col>
+                                <TaskList
+                                    Tasks={Group.group_tasks}
+                                    onTaskChange={fetchGroupData} />
+                            </Col>
+                        </Row>
                     </div>
             }
         </div>
@@ -325,6 +397,7 @@ function MembersList(props) {
     const jwt_token = localStorage.getItem('jwt')
 
     async function deleteMember(userPk) {
+        //What if the person delete himself
         const groupPk = props.Group.pk
         try {
             const response = await axios.delete(
@@ -342,18 +415,29 @@ function MembersList(props) {
     }
 
     return (
-        <table style={{ marginInlineStart: 'auto', marginInlineEnd: 'auto' }}>
-            <tbody>
+        <Row className="justify-content-center">
+            <Col style={{ maxWidth: '70%' }}>
                 {
                     Users.map((user) =>
-                        <tr key={user.pk}>
-                            <td>{user.username}</td>
-                            <td><button onClick={() => deleteMember(user.pk)}>Delete Member</button></td>
-                        </tr>
+                        <Row className="m-3" key={user.pk}>
+                            <Col >
+                                <Card>
+                                    <Card.Body>
+                                        <Card.Title>{user.username}</Card.Title>
+                                        <Button
+                                            onClick={() => deleteMember(user.pk)}
+                                            variant="danger"
+                                            style={{ float: 'right' }} >
+                                            Delete
+                                        </Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
                     )
                 }
-            </tbody>
-        </table>
+            </Col>
+        </Row>
     )
 }
 
@@ -382,32 +466,41 @@ function TaskList(props) {
         <div>
             {
                 Tasks.length ?
-                    <table style={{ marginInlineStart: 'auto', marginInlineEnd: 'auto' }}>
-                        <thead>
-                            <tr>
-                                <th>Task Name</th>
-                                <th>In Charge</th>
-                                <th>Due Date</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <Row className="justify-content-center">
+                        <Col style={{ maxWidth: "70%" }}>
                             {
                                 Tasks.map((task) =>
-                                    <tr key={task.pk}>
-                                        <td>{task.name}</td>
-                                        <td>{task.in_charge.username}</td>
-                                        <td>{task.due_date}</td>
-                                        <td><button onClick={() => deleteTask(task.pk)}>Delete</button></td>
-                                    </tr>
+                                    <Row key={task.pk} className="m-3">
+                                        <Card style={{ width: '100%', textAlign: 'start' }}>
+                                            <Card.Header>
+                                                <Row>
+                                                    <Col>
+                                                        <Card.Title>{task.name}</Card.Title>
+                                                        <Card.Subtitle >
+                                                            Due: <span className="text-muted">{task.due_date}</span>
+                                                            <br />
+                                                    In Charge: <span className="text-muted">{task.in_charge.username}</span>
+                                                        </Card.Subtitle>
+                                                    </Col>
+                                                    <Col>
+                                                        <Button
+                                                            variant="danger"
+                                                            onClick={() => deleteTask(task.pk)}
+                                                            style={{ float: 'right' }}>Delete</Button>
+                                                    </Col>
+                                                </Row>
+                                            </Card.Header>
+                                            <Card.Body><p>{task.desc}</p></Card.Body>
+                                        </Card>
+                                    </Row>
                                 )
                             }
-                        </tbody>
-                    </table>
+                        </Col>
+                    </Row>
                     :
-                    <div>
-                        <p>No task</p>
-                    </div>
+                    <Row>
+                        <Col><p>No task</p></Col>
+                    </Row>
             }
         </div>
     )
@@ -461,19 +554,34 @@ function AddMemberDialog(props) {
             open={props.open}
             onClose={props.onClose}
             aria-labelledby="form-dialog-title">
-            <form onSubmit={onSubmit}>
-                <label>Username
-                    <input
-                        type='text'
-                        name='username'
-                        value={Username}
-                        onChange={changeUsername}
-                    />
-                </label>
-                <br />
-                <button type="submit">Add Member</button>
-                <button type="button" onClick={props.onClose}>Cancel</button>
-            </form>
+            <Row className="m-3">
+                <Col>
+                    <Form onSubmit={onSubmit}>
+                        <Form.Group>
+                            <Form.Label>Username</Form.Label>
+                            <Form.Control
+                                type='text'
+                                placeholder="Insert username"
+                                name='username'
+                                value={Username}
+                                onChange={changeUsername} />
+                        </Form.Group>
+                        <Row>
+                            <Col xs="auto" className="my-1">
+                                <Button
+                                    variant="success"
+                                    type="submit">Add Member</Button>
+                            </Col>
+                            <Col xs="auto" className="my-1">
+                                <Button
+                                    variant="light"
+                                    type="button"
+                                    onClick={props.onClose}>Cancel</Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Col>
+            </Row>
         </Dialog>
     );
 }
@@ -541,66 +649,61 @@ function AddTaskDialog(props) {
             open={props.open}
             onClose={props.onClose}
             aria-labelledby="form-dialog-title" >
-
-            <form onSubmit={onSubmit}>
-                <label>
-                    Task Name:
-                    <input
-                        type='text'
-                        name='name'
-                        value={Name}
-                        onChange={changeName} />
-                </label>
-                <br />
-                <label>
-                    Task Description:
-                    <input
-                        type="text"
-                        name='desc'
-                        value={Desc}
-                        onChange={changeDesc} />
-                </label>
-                <br />
-                <label>
-                    Due Date:
-                    <input
-                        type="date"
-                        label='due_date'
-                        value={DueDate}
-                        onChange={changeDate} />
-                </label>
-                <br />
-                <label>
-                    In Charge:
-                    <select
-                        value={InChargePk}
-                        label='in_charge'
-                        onChange={changeInCharge} >
-                        <option
-                            value={inChargeDefault}
-                        >
-                            Select in charge
-                            </option>
-                        {
-                            props.Users.map((user) =>
+            <Row className="m-3">
+                <Col>
+                    <Form onSubmit={onSubmit}>
+                        <Form.Group>
+                            <Form.Label>Task Name:</Form.Label>
+                            <Form.Control
+                                type='text'
+                                name='name'
+                                value={Name}
+                                onChange={changeName} />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Task Description:</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name='desc'
+                                value={Desc}
+                                onChange={changeDesc} />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>Due Date:</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={DueDate}
+                                onChange={changeDate} />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>In Charge</Form.Label>
+                            <Form.Control as="select" onChange={changeInCharge} multiple>
                                 <option
-                                    key={user.pk}
-                                    value={user.pk}>
-                                    {user.username}
+                                    value={inChargeDefault}>
+                                    Select in charge
                                 </option>
-                            )
-                        }
-                    </select>
-                </label>
-                {
-                    Error !== '' ?
-                        <p>*{Error}</p> :
-                        <p></p>
-                }
-                <br />
-                <button type="submit">Add Task</button>
-                <button type="button" onClick={props.onClose} >Cancel</button>
-            </form>
+                                {
+                                    props.Users.map((user) =>
+                                        <option
+                                            key={user.pk}
+                                            value={user.pk}>
+                                            {user.username}
+                                        </option>
+                                    )
+                                }
+                            </Form.Control>
+                        </Form.Group>
+                        <Row>
+                            <Col className="my-1" xs="auto">
+                                <Button variant="success" type="submit">Add Task</Button>
+                            </Col>
+                            <Col className="my-1" xs="auto">
+                                <Button type="button" variant="light" onClick={props.onClose} >Cancel</Button>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Col>
+            </Row>
         </Dialog>
     )
 }
