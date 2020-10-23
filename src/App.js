@@ -26,7 +26,8 @@ import Form from 'react-bootstrap/Form'
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import logo from './logo.svg';
 
-const api_url = 'http://127.0.0.1:8000'
+// const api_url = 'http://127.0.0.1:8000'
+const api_url = 'http://grouptaskapi.viriyadhika.com'
 
 /**
  * Interesting observation: if the log in 

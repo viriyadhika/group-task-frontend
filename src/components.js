@@ -14,7 +14,8 @@ import Form from 'react-bootstrap/Form'
 import Table from 'react-bootstrap/Table'
 import Dialog from '@material-ui/core/Dialog';
 
-const api_url = 'http://127.0.0.1:8000'
+// const api_url = 'http://127.0.0.1:8000'
+const api_url = 'http://grouptaskapi.viriyadhika.com'
 
 class MyGroup extends Component {
 
