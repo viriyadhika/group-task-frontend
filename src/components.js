@@ -93,24 +93,27 @@ class MyGroup extends Component {
                             <h1>My Groups</h1>
                             <Button onClick={this.openAddNewGroupDialog}>Create New Group</Button>
                             <AddGroupDialog
+                                handleLogOut={this.props.handleLogOut}
                                 open={dialogOpen}
                                 onClose={this.closeDialog} />
                         </Col>
                     </Row>
                     <Row className="justify-content-center">
                         <Col style={{ maxWidth: '30rem' }}>
-                            <Row className="my-1 align-items-stretch justify-content-start">
-                                {groups.map((group) =>
-                                    <Col style={{ maxWidth: '12rem' }} className="m-1" key={group.pk} >
-                                        <Card>
-                                            <Card.Body>
-                                                <Link to={`/group/${group.pk}`} >
-                                                    {group.name}
-                                                </Link>
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                )}
+                            <Row className="m-1 align-items-stretch justify-content-start">
+                                {
+                                    groups.map((group) =>
+                                        <Col className="my-1" key={group.pk} sm={6} md={4}>
+                                            <Card>
+                                                <Card.Body>
+                                                    <Link to={`/group/${group.pk}`}>
+                                                        {group.name}
+                                                    </Link>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    )
+                                }
                             </Row>
                         </Col>
                     </Row>
@@ -138,17 +141,24 @@ function AddGroupDialog(props) {
             this.props.handleLogOut();
         }
 
-        const response = await axios.post(
-            `${api_url}/groups`,
-            {
-                name: Name
-            },
-            {
-                headers: {
-                    Authorization: 'Bearer ' + jwt
+        try {
+            const response = await axios.post(
+                `${api_url}/groups`,
+                {
+                    name: Name
+                },
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + jwt
+                    }
                 }
+            )
+        } catch (err) {
+            if (err.response.status === 401) {
+                this.props.handleLogOut();
             }
-        )
+            console.log(err);
+        }
         props.onClose();
     }
 
@@ -195,7 +205,7 @@ function AddGroupDialog(props) {
 
 function MyTask(props) {
     const [Tasks, setTasks] = useState([]);
-    //What if user is not logged in
+
     const userId = localStorage.getItem('userId');
     const jwt = localStorage.getItem('jwt');
 
@@ -211,8 +221,10 @@ function MyTask(props) {
             )
             setTasks(taskData.data.my_tasks)
         } catch (err) {
+            if (err.response.status === 401) {
+                props.handleLogOut();
+            }
             console.log(err);
-            props.handleLogOut();
         }
     }
 
@@ -241,32 +253,34 @@ function MyTask(props) {
             </Row>
             <Row className="justify-content-center">
                 <Col style={{ maxWidth: '70%' }}>
-                    <Table bordered style={{ textAlign: 'left' }}>
-                        <thead>
-                            <tr>
-                                <th>Task Name</th>
-                                <th>Description</th>
-                                <th>Due Date</th>
-                                <th>Group</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                Tasks.map((task) =>
-                                    <tr key={task.pk}>
-                                        <td>{task.name}</td>
-                                        <td>{task.desc}</td>
-                                        <td>{task.due_date}</td>
-                                        <td>
-                                            <Link to={`/group/${task.group.pk}`}>
-                                                {task.group.name}
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                )
-                            }
-                        </tbody>
-                    </Table>
+                    <div style={{ 'overflow-x': 'auto' }}>
+                        <Table bordered style={{ textAlign: 'left' }}>
+                            <thead>
+                                <tr>
+                                    <th>Task Name</th>
+                                    <th>Description</th>
+                                    <th>Due Date</th>
+                                    <th>Group</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    Tasks.map((task) =>
+                                        <tr key={task.pk}>
+                                            <td>{task.name}</td>
+                                            <td>{task.desc}</td>
+                                            <td>{task.due_date}</td>
+                                            <td>
+                                                <Link to={`/group/${task.group.pk}`}>
+                                                    {task.group.name}
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    )
+                                }
+                            </tbody>
+                        </Table>
+                    </div>
                 </Col>
             </Row >
 
@@ -354,12 +368,14 @@ function Group(props) {
                             </Col>
                         </Row>
                         <AddMemberDialog
+                            handleLogOut={props.handleLogOut}
                             open={AddMemberDialogOpen}
                             onClose={cancelAddMember}
                             groupId={Group.pk} />
                         <Row>
                             <Col>
                                 <MembersList
+                                    handleLogOut={props.handleLogOut}
                                     onUserChange={fetchGroupData}
                                     Users={Group.members}
                                     Group={Group} />
@@ -376,6 +392,7 @@ function Group(props) {
                             </Col>
                         </Row>
                         <AddTaskDialog
+                            handleLogOut={props.handleLogOut}
                             Group={Group}
                             Users={Group.members}
                             open={AddTaskDialogOpen}
@@ -383,6 +400,7 @@ function Group(props) {
                         <Row className="justify-content-center">
                             <Col>
                                 <TaskList
+                                    handleLogOut={props.handleLogOut}
                                     Tasks={Group.group_tasks}
                                     onTaskChange={fetchGroupData} />
                             </Col>
@@ -411,6 +429,9 @@ function MembersList(props) {
             )
             props.onUserChange();
         } catch (err) {
+            if (err.response.status === 401) {
+                props.handleLogOut();
+            }
             console.log(err)
         }
     }
@@ -459,6 +480,9 @@ function TaskList(props) {
             )
             props.onTaskChange();
         } catch (err) {
+            if (err.response.status === 401) {
+                props.handleLogOut();
+            }
             console.log(err);
         }
     }
@@ -518,15 +542,24 @@ function AddMemberDialog(props) {
     }
 
     async function convertUsernameToUserId(username) {
-        const userId = await axios.get(
-            `${api_url}/users/${username}`,
-            {
-                headers: {
-                    Authorization: 'Bearer ' + jwt_token
+        try {
+            const userId = await axios.get(
+                `${api_url}/users/${username}`,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + jwt_token
+                    }
                 }
-            }
-        )
-        return userId.data.pk
+            )
+            return userId.data.pk
+        } catch (err) {
+            // the username doesn't exist
+            throw err;
+        }
+    }
+
+    function handleUserNotExist(username) {
+        alert(username + " is not a registered user");
     }
 
     async function onSubmit(event) {
@@ -534,7 +567,7 @@ function AddMemberDialog(props) {
         let { groupId } = props
         try {
             const userId = await convertUsernameToUserId(Username);
-            //What if username is invalid?
+
             const response = await axios.put(
                 `${api_url}/groups/${groupId}/users/${userId}`,
                 {},
@@ -546,6 +579,13 @@ function AddMemberDialog(props) {
             );
             props.onClose();
         } catch (err) {
+            if (err.response.status === 404) {
+                handleUserNotExist(Username);
+            }
+            if (err.response.status === 401) {
+                props.handleLogOut();
+                console.log();
+            }
             console.log(err);
         }
     }
@@ -631,6 +671,9 @@ function AddTaskDialog(props) {
                 }
             )
         } catch (err) {
+            if (err.response.status === 401) {
+                props.handleLogOut();
+            }
             console.log(err);
         }
     }

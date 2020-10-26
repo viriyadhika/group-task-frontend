@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  box-sizing: border-box;
 }
 
 .App-logo {
@@ -53,4 +54,37 @@
 
 .card {
   height: 100%;
+}
+
+.grid-container {
+  box-sizing: border-box;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  padding: 1rem;
+}
+
+@media screen and (max-width: 300px) {
+  .grid-container {
+    box-sizing: border-box;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 150px) {
+  .grid-container {
+    box-sizing: border-box;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: auto;
+    padding: 1rem;
+  }
+}
+
+.grid-item {
+  width: 100%;
+  float: left;
 }
