@@ -474,7 +474,7 @@ function MembersList(props) {
 function TaskList(props) {
     const Tasks = props.Tasks
 
-    const jwt_token = localStorage.getItem('jwt')
+    const jwt_token = localStorage.getItem('jwt');
 
     async function deleteTask(taskPk) {
         try {
@@ -514,6 +514,10 @@ function TaskList(props) {
                                                             <br />
                                                     In Charge: <span className="text-muted">{task.in_charge.username}</span>
                                                         </Card.Subtitle>
+                                                        <DoneCheckBox
+                                                            onTaskChange={props.onTaskChange}
+                                                            task={task}
+                                                            handleLogOut={props.handleLogOut} />
                                                     </Col>
                                                     <Col>
                                                         <Button
@@ -536,6 +540,55 @@ function TaskList(props) {
                     </Row>
             }
         </div>
+    )
+}
+
+function DoneCheckBox(props) {
+    const [Task, setTask] = useState(props.task);
+
+    const jwt_token = localStorage.getItem('jwt');
+    if (jwt_token === null) {
+        props.handleLogOut();
+    }
+
+    async function handleChangeDone(event) {
+        event.preventDefault();
+
+        setTask({
+            ...Task,
+            is_done: event.target.checked
+        });
+        try {
+            const changeDone = await axios.patch(
+                `${api_url}/tasks/${Task.pk}`,
+                {
+                    is_done: event.target.checked
+                },
+                {
+                    headers: {
+                        Authorization: "Bearer " + jwt_token
+                    }
+                }
+            )
+            props.onTaskChange();
+        } catch (err) {
+            if (err.response.status === 401) {
+                props.handleLogOut();
+            }
+            console.log(err);
+        }
+    }
+
+    return (
+        <Form>
+            <Form.Group>
+                <Form.Check
+                    onChange={handleChangeDone}
+                    checked={Task.is_done}
+                    label="Done"
+                    type="checkbox" />
+            </Form.Group>
+        </Form>
     )
 }
 
