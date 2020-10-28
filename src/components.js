@@ -12,7 +12,8 @@ import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
 import Table from 'react-bootstrap/Table'
-import Dialog from '@material-ui/core/Dialog';
+import Dialog from '@material-ui/core/Dialog'
+import Helmet from 'react-helmet'
 
 // const api_url = 'http://127.0.0.1:8000'
 const api_url = 'http://grouptaskapi.viriyadhika.com'
@@ -86,40 +87,44 @@ class MyGroup extends Component {
             return (<Redirect to='/login' />)
         }
         return (
-            <Row className="justify-content-center">
-                <Col>
-                    <Row>
-                        <Col>
-                            <h1>My Groups</h1>
-                            <Button onClick={this.openAddNewGroupDialog}>Create New Group</Button>
-                            <AddGroupDialog
-                                handleLogOut={this.props.handleLogOut}
-                                open={dialogOpen}
-                                onClose={this.closeDialog} />
-                        </Col>
-                    </Row>
-                    <Row className="justify-content-center">
-                        <Col style={{ maxWidth: '30rem' }}>
-                            <Row className="m-1 align-items-stretch justify-content-start">
-                                {
-                                    groups.map((group) =>
-                                        <Col className="my-1" key={group.pk} sm={6} md={4}>
-                                            <Card>
-                                                <Card.Body>
-                                                    <Link to={`/group/${group.pk}`}>
-                                                        {group.name}
-                                                    </Link>
-                                                </Card.Body>
-                                            </Card>
-                                        </Col>
-                                    )
-                                }
-                            </Row>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-
+            <div className="my-group">
+                <Helmet>
+                    <title>Group Task - My Group</title>
+                </Helmet>
+                <Row className="justify-content-center">
+                    <Col>
+                        <Row>
+                            <Col>
+                                <h1>My Groups</h1>
+                                <Button onClick={this.openAddNewGroupDialog}>Create New Group</Button>
+                                <AddGroupDialog
+                                    handleLogOut={this.props.handleLogOut}
+                                    open={dialogOpen}
+                                    onClose={this.closeDialog} />
+                            </Col>
+                        </Row>
+                        <Row className="justify-content-center">
+                            <Col style={{ maxWidth: '30rem' }}>
+                                <Row className="m-1 align-items-stretch justify-content-start">
+                                    {
+                                        groups.map((group) =>
+                                            <Col className="my-1" key={group.pk} sm={6} md={4}>
+                                                <Card>
+                                                    <Card.Body>
+                                                        <Link to={`/group/${group.pk}`}>
+                                                            {group.name}
+                                                        </Link>
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        )
+                                    }
+                                </Row>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+            </div>
         )
     };
 }
@@ -246,6 +251,9 @@ function MyTask(props) {
 
     return (
         <div>
+            <Helmet>
+                <title>Group Task - My Tasks</title>
+            </Helmet>
             <Row className='justify-content-center'>
                 <Col>
                     <h1>My Tasks</h1>
@@ -253,7 +261,7 @@ function MyTask(props) {
             </Row>
             <Row className="justify-content-center">
                 <Col style={{ maxWidth: '70%' }}>
-                    <div style={{ 'overflow-x': 'auto' }}>
+                    <div style={{ overflowX: 'auto' }}>
                         <Table bordered style={{ textAlign: 'left' }}>
                             <thead>
                                 <tr>
@@ -723,6 +731,7 @@ function AddTaskDialog(props) {
                             <Form.Label>In Charge</Form.Label>
                             <Form.Control as="select" onChange={changeInCharge} multiple>
                                 <option
+                                    selected
                                     value={inChargeDefault}>
                                     Select in charge
                                 </option>
@@ -737,6 +746,9 @@ function AddTaskDialog(props) {
                                 }
                             </Form.Control>
                         </Form.Group>
+                        {
+                            Error ? <p className="text-danger">{Error}</p> : <span></span>
+                        }
                         <Row>
                             <Col className="my-1" xs="auto">
                                 <Button variant="success" type="submit">Add Task</Button>
@@ -745,6 +757,7 @@ function AddTaskDialog(props) {
                                 <Button type="button" variant="light" onClick={props.onClose} >Cancel</Button>
                             </Col>
                         </Row>
+
                     </Form>
                 </Col>
             </Row>

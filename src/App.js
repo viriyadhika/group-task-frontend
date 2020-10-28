@@ -23,7 +23,9 @@ import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import Image from 'react-bootstrap/Image'
+import NavDropdown from 'react-bootstrap/NavDropdown'
+import Helmet from 'react-helmet'
 import logo from './logo.svg';
 
 // const api_url = 'http://127.0.0.1:8000'
@@ -71,11 +73,14 @@ function App(props) {
 
   return (
     <div className="App">
+      <Helmet>
+        <title>Group Task App</title>
+      </Helmet>
       <Router>
         <NavBar
           username={Username}
           isLoggedIn={LoggedIn} />
-        <Container className="p-3" fluid="md">
+        <Container style={{ overflowX: 'auto' }} className="p-3" fluid="md">
           <Switch>
             <Route exact path="/">
               <Home />
@@ -170,94 +175,135 @@ function SignUp(props) {
   }
 
   return (
-    <Row className="justify-content-center">
-      <Col md="auto">
-        <Card>
-          <Row className="p-3">
-            <Col>
-              <Row className="justify-content-start">
-                <Col className="registration-title">
-                  <h2>Sign Up</h2>
-                </Col>
-              </Row>
-              <Row className="justify-content-start">
-                <Col>
-                  <Form onSubmit={handleSubmit}>
-                    <Form.Group>
-                      <Form.Label>Username</Form.Label>
-                      <Form.Control
-                        value={Username}
-                        type='text'
-                        onChange={handleChangeUsername}
-                        placeholder="Enter username"
-                      />
-                    </Form.Group>
-                    <Form.Group>
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control
-                        value={Email}
-                        type='email'
-                        onChange={handleChangeEmail}
-                        placeholder="Enter Email"
-                      />
-                    </Form.Group>
-                    <Form.Group>
-                      <Form.Label>Password</Form.Label>
-                      <Form.Control
-                        value={Password}
-                        type='password'
-                        onChange={handleChangePassword}
-                        placeholder="Enter Password"
-                      />
-                    </Form.Group>
-                    <Form.Group>
-                      <Form.Label>Confirm Password</Form.Label>
-                      <Form.Control
-                        value={ConfirmPassword}
-                        type='password'
-                        onChange={handleChangeConfirmPassword}
-                        placeholder="Enter Password"
-                      />
-                      {
-                        Password === ConfirmPassword ?
-                          <span></span>
-                          :
-                          <div>
-                            <Form.Text className="text-danger">Password do not match</Form.Text>
-                            <br />
-                          </div>
-                      }
-                      {
-                        Error ?
-                          <div>
-                            <Form.Text className="text-danger">{Error}</Form.Text>
-                            <br />
-                          </div>
-                          :
-                          <span></span>
-                      }
-                    </Form.Group>
-                    <Button
-                      type="submit"
-                      variant="success" >
-                      Sign Up
+    <div className="signup">
+      <Helmet>
+        <title>Group Task - Sign Up</title>
+      </Helmet>
+      <Row className="justify-content-center">
+        <Col md="auto">
+          <Card>
+            <Row className="p-3">
+              <Col>
+                <Row className="justify-content-start">
+                  <Col className="registration-title">
+                    <h2>Sign Up</h2>
+                  </Col>
+                </Row>
+                <Row className="justify-content-start">
+                  <Col>
+                    <Form onSubmit={handleSubmit}>
+                      <Form.Group>
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control
+                          value={Username}
+                          type='text'
+                          onChange={handleChangeUsername}
+                          placeholder="Enter username"
+                        />
+                      </Form.Group>
+                      <Form.Group>
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
+                          value={Email}
+                          type='email'
+                          onChange={handleChangeEmail}
+                          placeholder="Enter Email"
+                        />
+                      </Form.Group>
+                      <Form.Group>
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control
+                          value={Password}
+                          type='password'
+                          onChange={handleChangePassword}
+                          placeholder="Enter Password"
+                        />
+                      </Form.Group>
+                      <Form.Group>
+                        <Form.Label>Confirm Password</Form.Label>
+                        <Form.Control
+                          value={ConfirmPassword}
+                          type='password'
+                          onChange={handleChangeConfirmPassword}
+                          placeholder="Enter Password"
+                        />
+                        {
+                          Password === ConfirmPassword ?
+                            <span></span>
+                            :
+                            <div>
+                              <Form.Text className="text-danger">Password do not match</Form.Text>
+                              <br />
+                            </div>
+                        }
+                        {
+                          Error ?
+                            <div>
+                              <Form.Text className="text-danger">{Error}</Form.Text>
+                              <br />
+                            </div>
+                            :
+                            <span></span>
+                        }
+                      </Form.Group>
+                      <Button
+                        type="submit"
+                        variant="success" >
+                        Sign Up
                   </Button>
-                  </Form>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+                    </Form>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+
   );
 }
 
 function Home() {
   return (
-    <Jumbotron>
-      <h1>Home</h1>
-    </Jumbotron>
+    <div className="home">
+      <Jumbotron style={{ textAlign: 'start' }}>
+        <h1>Welcome to Group Task Website</h1>
+        <p>
+          This website seek to organize your group work better.
+          You can create a group for collaboration and manage the tasks required with ease!
+        </p>
+      </Jumbotron>
+      <Row className="justify-content-center">
+        <Col className="my-1" md={4} style={{ maxWidth: '20rem' }}>
+          <Card>
+            <Card.Body>
+              <Image fluid className='img-responsive' src={process.env.PUBLIC_URL + '/create-group.png'} />
+              <h2>Step 1</h2>
+              <p>Create a new group and invite your group members through username</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col className="my-1" md={4} style={{ maxWidth: '20rem' }}>
+          <Card>
+            <Card.Body>
+              <Image fluid className='img-responsive' src={process.env.PUBLIC_URL + '/create-task.png'} />
+              <h2>Step 2</h2>
+              <p>List all the tasks that needs to be done by the group. You can also assign a specific task to a group member.</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col className="my-1" md={4} style={{ maxWidth: '20rem' }}>
+          <Card>
+            <Card.Body>
+              <Image fluid className='img-responsive' src={process.env.PUBLIC_URL + '/track-tasks.png'} />
+              <h2>Step 3</h2>
+              <p>Track the progress of each task</p>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
   )
 }
 
@@ -389,49 +435,54 @@ class Login extends Component {
     }
 
     return (
-      <Row className="justify-content-center">
-        <Col md="auto">
-          <Card>
-            <Row className="p-3">
-              <Col>
-                <Row className="justify-content-start">
-                  <Col md="auto">
-                    <h2 className="registration-title">Log In</h2>
-                  </Col>
-                </Row>
-                <Row className="justify-content-start">
-                  <Col>
-                    <Form onSubmit={(event) => this.handleLogin(event)}>
-                      <Form.Group controlId="username">
-                        <Form.Label>Username</Form.Label>
-                        <Form.Control
-                          onChange={this.handleChangeUsername}
-                          type="text"
-                          value={this.state.username}
-                          placeholder="Enter email" />
-                      </Form.Group>
-                      <Form.Group controlId="password">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control
-                          onChange={this.handleChangePassword}
-                          type="password"
-                          value={this.state.password}
-                          placeholder="Enter password" />
-                      </Form.Group>
-                      <Button
-                        type="submit"
-                        variant="success" >
-                        Log In
+      <div className="login">
+        <Helmet>
+          <title>Group Task - Log In</title>
+        </Helmet>
+        <Row className="justify-content-center">
+          <Col md="auto">
+            <Card>
+              <Row className="p-3">
+                <Col>
+                  <Row className="justify-content-start">
+                    <Col md="auto">
+                      <h2 className="registration-title">Log In</h2>
+                    </Col>
+                  </Row>
+                  <Row className="justify-content-start">
+                    <Col>
+                      <Form onSubmit={(event) => this.handleLogin(event)}>
+                        <Form.Group controlId="username">
+                          <Form.Label>Username</Form.Label>
+                          <Form.Control
+                            onChange={this.handleChangeUsername}
+                            type="text"
+                            value={this.state.username}
+                            placeholder="Enter email" />
+                        </Form.Group>
+                        <Form.Group controlId="password">
+                          <Form.Label>Password</Form.Label>
+                          <Form.Control
+                            onChange={this.handleChangePassword}
+                            type="password"
+                            value={this.state.password}
+                            placeholder="Enter password" />
+                        </Form.Group>
+                        <Button
+                          type="submit"
+                          variant="success" >
+                          Log In
                   </Button>
-                      <p>{error_msg}</p>
-                    </Form>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+                        <p>{error_msg}</p>
+                      </Form>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        </Row>
+      </div>
     );
   }
 }
