@@ -29,7 +29,7 @@ import Helmet from 'react-helmet'
 import logo from './logo.svg';
 
 // const api_url = 'http://127.0.0.1:8000'
-const api_url = 'http://grouptaskapi.viriyadhika.com'
+const api_url = 'https://grouptaskapi.viriyadhika.com'
 
 /**
  * Interesting observation: if the log in 

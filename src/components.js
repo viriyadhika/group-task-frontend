@@ -16,7 +16,7 @@ import Dialog from '@material-ui/core/Dialog'
 import Helmet from 'react-helmet'
 
 // const api_url = 'http://127.0.0.1:8000'
-const api_url = 'http://grouptaskapi.viriyadhika.com'
+const api_url = 'https://grouptaskapi.viriyadhika.com'
 
 class MyGroup extends Component {
 
