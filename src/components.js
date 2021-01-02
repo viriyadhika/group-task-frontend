@@ -30,6 +30,7 @@ class MyGroup extends Component {
         this.openAddNewGroupDialog = this.openAddNewGroupDialog.bind(this);
         this.rerender = this.rerender.bind(this);
         this.closeDialog = this.closeDialog.bind(this);
+        this.deleteGroup = this.deleteGroup.bind(this);
     }
 
     async getGroupData(userId, jwt) {
@@ -45,6 +46,26 @@ class MyGroup extends Component {
             this.setState({
                 groups: groupData.data.my_groups
             });
+        } catch (err) {
+            console.log(err);
+            if (err.response.status === 401) {
+                this.props.handleLogOut();
+            }
+        }
+    }
+
+    async deleteGroup(groupId) {
+        const jwt = localStorage.getItem('jwt');
+        try {
+            const deleteResponse = await axios.delete(
+                `${api_url}/groups/${groupId}`,
+                {
+                    headers: {
+                        'Authorization': ('Bearer ' + jwt)
+                    }
+                }
+            );
+            this.rerender();
         } catch (err) {
             console.log(err);
             if (err.response.status === 401) {
@@ -104,16 +125,29 @@ class MyGroup extends Component {
                             </Col>
                         </Row>
                         <Row className="justify-content-center">
-                            <Col style={{ maxWidth: '30rem' }}>
+                            <Col style={{ maxWidth: '70%' }}>
                                 <Row className="m-1 align-items-stretch justify-content-start">
                                     {
                                         groups.map((group) =>
                                             <Col className="my-1" key={group.pk} sm={6} md={4}>
                                                 <Card>
                                                     <Card.Body>
-                                                        <Link to={`/group/${group.pk}`}>
-                                                            {group.name}
-                                                        </Link>
+                                                        <Row>
+                                                            <Col>
+                                                                <Link to={`/group/${group.pk}`}>
+                                                                    {group.name}
+                                                                </Link>
+                                                            </Col>
+                                                        </Row>
+                                                        <Row className="justify-content-start">
+                                                            <Col className="my-1">
+                                                                <Button
+                                                                    className="btn-danger"
+                                                                    onClick={() => this.deleteGroup(group.pk)}>
+                                                                    Delete
+                                                                </Button>
+                                                            </Col>
+                                                        </Row>
                                                     </Card.Body>
                                                 </Card>
                                             </Col>
@@ -134,6 +168,10 @@ function AddGroupDialog(props) {
 
     function handleChangeName(event) {
         setName(event.target.value)
+    }
+
+    function resetDialog() {
+        setName('');
     }
 
     async function createNewGroup(event) {
@@ -158,6 +196,7 @@ function AddGroupDialog(props) {
                     }
                 }
             )
+            resetDialog();
         } catch (err) {
             if (err.response.status === 401) {
                 this.props.handleLogOut();
@@ -440,6 +479,9 @@ function MembersList(props) {
             if (err.response.status === 401) {
                 props.handleLogOut();
             }
+            if (err.response.status === 400) {
+                alert(err.response.data.detail)
+            }
             console.log(err)
         }
     }
@@ -623,6 +665,10 @@ function AddMemberDialog(props) {
         alert(username + " is not a registered user");
     }
 
+    function resetForm() {
+        setUsername('');
+    }
+
     async function onSubmit(event) {
         event.preventDefault();
         let { groupId } = props
@@ -638,6 +684,7 @@ function AddMemberDialog(props) {
                     }
                 }
             );
+            resetForm();
             props.onClose();
         } catch (err) {
             if (err.response.status === 404) {
@@ -714,6 +761,13 @@ function AddTaskDialog(props) {
         setInChargePk(event.target.value);
     }
 
+    function resetDialog() {
+        setName('');
+        setDesc('');
+        setDueDate('');
+        setInChargePk(inChargeDefault);
+    }
+
     async function addTask() {
         try {
             const response = await axios.post(
@@ -731,6 +785,8 @@ function AddTaskDialog(props) {
                     }
                 }
             )
+
+            resetDialog();
         } catch (err) {
             if (err.response.status === 401) {
                 props.handleLogOut();

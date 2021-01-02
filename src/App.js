@@ -155,10 +155,19 @@ function SignUp(props) {
           password: Password,
         }
       )
+      alert("Sign up successful! Please log in");
+      resetForm();
       console.log(response)
     } catch (err) {
       setError(err.response.data[0])
     }
+  }
+
+  function resetForm() {
+    setUsername('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
   }
 
   function handleSubmit(event) {
